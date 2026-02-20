@@ -40,9 +40,8 @@ jobs:
           fi
 
           SHORT_SHA="${GITHUB_SHA::7}"
-          DMG_NAME="3sx-macos-${SHORT_SHA}.dmg"
+          DMG_NAME="3SX-${SHORT_SHA}-macos.dmg"
           mv "${DMG_PATH}" "${DMG_NAME}"
-          shasum -a 256 "${DMG_NAME}" > "${DMG_NAME}.sha256"
         shell: bash
 
       - name: Upload macOS release assets
@@ -50,8 +49,7 @@ jobs:
         with:
           name: release-assets-macos
           path: |
-            3sx-macos-*.dmg
-            3sx-macos-*.dmg.sha256
+            3SX-*-macos.dmg
 
       - name: Upload macOS build log
         if: always()
@@ -107,20 +105,16 @@ jobs:
         shell: pwsh
         run: |
           $shortSha = "${env:GITHUB_SHA}".Substring(0, 7)
-          $archiveName = "3sx-windows-$shortSha.zip"
+          $archiveName = "3SX-$shortSha-windows.zip"
 
           Compress-Archive -Path "dist\*" -DestinationPath $archiveName -Force
-
-          $hash = (Get-FileHash -Algorithm SHA256 $archiveName).Hash.ToLower()
-          "$hash  $archiveName" | Out-File -FilePath "$archiveName.sha256" -Encoding ascii
 
       - name: Upload Windows release assets
         uses: actions/upload-artifact@v4
         with:
           name: release-assets-windows
           path: |
-            3sx-windows-*.zip
-            3sx-windows-*.zip.sha256
+            3SX-*-windows.zip
 
       - name: Upload Windows build log
         if: always()
@@ -139,6 +133,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Download release assets
         uses: actions/download-artifact@v4
@@ -147,17 +143,34 @@ jobs:
           merge-multiple: true
           path: release-assets
 
+      - name: Move rolling release tag to current commit
+        env:
+          TAG_NAME: rolling-pre-release
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git tag -f "${TAG_NAME}" "${GITHUB_SHA}"
+          git push origin "refs/tags/${TAG_NAME}" --force
+
       - name: Create or update GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG_NAME: sha-${{ github.sha }}
+          TAG_NAME: rolling-pre-release
+          FULL_SHA: ${{ github.sha }}
         run: |
           set -euo pipefail
+          SHORT_SHA="${FULL_SHA:0:7}"
 
           if gh release view "${TAG_NAME}" >/dev/null 2>&1; then
+            gh release edit "${TAG_NAME}" --title "${SHORT_SHA}" --prerelease
+            for asset in $(gh release view "${TAG_NAME}" --json assets --jq '.assets[].name'); do
+              gh release delete-asset "${TAG_NAME}" "${asset}" --yes
+            done
             gh release upload "${TAG_NAME}" release-assets/* --clobber
           else
             gh release create "${TAG_NAME}" release-assets/* \
-              --title "Release ${TAG_NAME}" \
+              --title "${SHORT_SHA}" \
+              --prerelease \
               --notes "Automated release for commit ${{ github.sha }}."
           fi
