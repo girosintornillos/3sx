@@ -55,7 +55,7 @@ You should be able to build the project with just Xcode Command Line Tools.
     cmake --install build --prefix build/application
     ```
 
-2.5 Build for Network
+3. Build for Network
 
     ```bash
     CC=clang cmake -B build -DCMAKE_BUILD_TYPE=Debug
@@ -63,4 +63,4 @@ You should be able to build the project with just Xcode Command Line Tools.
     cmake --install build --prefix build/application
     ```
 
-3. Copy from build/application to the desired location
+4. Copy from build/application to the desired location
