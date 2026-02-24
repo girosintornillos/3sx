@@ -4,8 +4,6 @@
 /// Get app directory path
 ///
 /// This value shouldn't be freed after use
-const char* Paths_GetPrefPath();
-
 const char* Paths_GetBasePath();
 
 #endif
