@@ -255,51 +255,51 @@ void SDLPad_HandleKeyboardEvent(SDL_KeyboardEvent* event) {
     SDLPad_ButtonState* state = &button_state[keyboard_index];
 
     switch (event->key) {
-    case SDLK_W:
+    case SDLK_UP:
         state->dpad_up = event->down;
         break;
 
-    case SDLK_A:
+    case SDLK_LEFT:
         state->dpad_left = event->down;
         break;
 
-    case SDLK_S:
+    case SDLK_DOWN:
         state->dpad_down = event->down;
         break;
 
-    case SDLK_D:
+    case SDLK_RIGHT:
         state->dpad_right = event->down;
         break;
 
-    case SDLK_I:
+    case SDLK_S:
         state->north = event->down;
         break;
 
-    case SDLK_J:
+    case SDLK_Z:
         state->south = event->down;
         break;
 
-    case SDLK_K:
+    case SDLK_X:
         state->east = event->down;
         break;
 
-    case SDLK_U:
+    case SDLK_A:
         state->west = event->down;
         break;
 
-    case SDLK_P:
+    case SDLK_F:
         state->left_shoulder = event->down;
         break;
 
-    case SDLK_O:
+    case SDLK_D:
         state->right_shoulder = event->down;
         break;
 
-    case SDLK_SEMICOLON:
+    case SDLK_V:
         state->left_trigger = event->down ? SDL_MAX_SINT16 : 0;
         break;
 
-    case SDLK_L:
+    case SDLK_C:
         state->right_trigger = event->down ? SDL_MAX_SINT16 : 0;
         break;
 
