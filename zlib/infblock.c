@@ -208,7 +208,7 @@ int r;
       q += t;  m -= t;
       if ((s->sub.left -= t) != 0)
         break;
-      Tracev((stderr, "inflate:       stored end, %lu total out\n",
+      Tracev((stderr, "inflate:       stored end, %lld total out\n",
               z->total_out + (q >= s->read ? q - s->read :
               (s->end - s->read) + (q - s->window))));
       s->mode = s->last ? DRY : TYPE;
@@ -342,7 +342,7 @@ int r;
       r = Z_OK;
       inflate_codes_free(s->sub.decode.codes, z);
       LOAD
-      Tracev((stderr, "inflate:       codes end, %lu total out\n",
+      Tracev((stderr, "inflate:       codes end, %lld total out\n",
               z->total_out + (q >= s->read ? q - s->read :
               (s->end - s->read) + (q - s->window))));
       if (!s->last)
