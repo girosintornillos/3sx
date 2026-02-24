@@ -33,7 +33,7 @@ file(GLOB_RECURSE GAME_SRC src/*.c)
 file(GLOB_RECURSE ZLIB_SRC zlib/*.c)
 
 add_executable(3sx MACOSX_BUNDLE
-    ${GAME_SRC} ${ZLIB_SRC}
+    ${GAME_SRC} ${ZLIB_SRC} icon.rc
 )
 
 # ======================================
