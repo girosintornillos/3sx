@@ -129,24 +129,9 @@ int SDLApp_Init() {
         window_height = window_min_height;
     }
 
-    // Force VSync for deterministic CRT timing (Parity Lab)
-    SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
-
     if (!SDL_CreateWindowAndRenderer(app_name, window_width, window_height, window_flags, &window, &renderer)) {
         SDL_Log("Couldn't create window/renderer: %s", SDL_GetError());
         return 1;
-    }
-
-    if (!SDL_SetRenderVSync(renderer, 1)) {
-        SDL_Log("SDL_SetRenderVSync failed: %s", SDL_GetError());
-    }
-
-    // Optional: log what we actually got
-    int vs = 0;
-    if (SDL_GetRenderVSync(renderer, &vs)) {
-        SDL_Log("SDL renderer vsync = %d", vs);
-    } else {
-        SDL_Log("SDL_GetRenderVSync failed: %s", SDL_GetError());
     }
 
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
@@ -359,6 +344,7 @@ void SDLApp_EndFrame() {
     ADX_ProcessTracks();
 
     // Render
+
     // This should come before SDLGameRenderer_RenderFrame,
     // because NetstatsRenderer uses the existing SFIII rendering pipeline
     NetstatsRenderer_Render();
@@ -388,10 +374,18 @@ void SDLApp_EndFrame() {
     }
 
 #if defined(DEBUG)
+    // Render debug text
     SDLDebugText_Render();
+
+    // Render metrics
+    // int window_width;
+    // SDL_GetRenderOutputSize(renderer, &window_width, NULL);
+    // SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+    // SDL_SetRenderScale(renderer, 2, 2);
+    // SDL_RenderDebugTextFormat(renderer, (window_width / 2) - 88, 2, "FPS: %.3f", fps);
+    // SDL_SetRenderScale(renderer, 1, 1);
 #endif
 
-    // Present (this is the vsync boundary when vsync is active)
     SDL_RenderPresent(renderer);
 
     // Cleanup
@@ -401,32 +395,24 @@ void SDLApp_EndFrame() {
     // Handle cursor hiding
     hide_cursor_if_needed();
 
-    // Only do software pacing if renderer vsync is NOT active.
-    int vsync = 0;
-    const bool got_vsync = SDL_GetRenderVSync(renderer, &vsync);
+    // Do frame pacing
+    Uint64 now = SDL_GetTicksNS();
 
-    if (!got_vsync || vsync == 0) {
-        Uint64 now = SDL_GetTicksNS();
+    if (frame_deadline == 0) {
+        frame_deadline = now + target_frame_time_ns;
+    }
 
-        if (frame_deadline == 0) {
-            frame_deadline = now + target_frame_time_ns;
-        }
+    if (now < frame_deadline) {
+        Uint64 sleep_time = frame_deadline - now;
+        SDL_DelayNS(sleep_time);
+        now = SDL_GetTicksNS();
+    }
 
-        if (now < frame_deadline) {
-            const Uint64 sleep_time = frame_deadline - now;
-            SDL_DelayNS(sleep_time);
-            now = SDL_GetTicksNS();
-        }
+    frame_deadline += target_frame_time_ns;
 
-        frame_deadline += target_frame_time_ns;
-
-        // If we fell behind by more than one frame, resync to avoid spiraling
-        if (now > frame_deadline + target_frame_time_ns) {
-            frame_deadline = now + target_frame_time_ns;
-        }
-    } else {
-        // When vsync is active, don't carry deadline forward (avoid weird jumps if toggling)
-        frame_deadline = 0;
+    // If we fell behind by more than one frame, resync to avoid spiraling
+    if (now > frame_deadline + target_frame_time_ns) {
+        frame_deadline = now + target_frame_time_ns;
     }
 
     // Measure
