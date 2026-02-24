@@ -138,7 +138,7 @@ static void dump_defaults(const char* dst_path) {
 }
 
 void Config_Init() {
-    const char* pref_path = Paths_GetPrefPath();
+    const char* pref_path = Paths_GetBasePath();
     char* config_path;
     SDL_asprintf(&config_path, "%sconfig", pref_path);
 
