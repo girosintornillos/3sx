@@ -87,7 +87,7 @@ static void open_dialog() {
 }
 
 char* Resources_GetPath(const char* file_path) {
-    const char* base = Paths_GetPrefPath();
+    const char* base = Paths_GetBasePath();
     char* full_path = NULL;
 
     if (file_path == NULL) {
