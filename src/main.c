@@ -145,10 +145,10 @@ int main(int argc, char* argv[]) {
     }
 
     while (is_running) {
-        is_running = SDLApp_PollEvents();
         SDLApp_BeginFrame();
         step_0();
         SDLApp_EndFrame();
+        is_running = SDLApp_PollEvents();
         step_1();
     }
 
