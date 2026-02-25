@@ -16,6 +16,7 @@ void Clear_Personal_Data(s16 PL_id);
 s16 Check_Count_Cut(s16 PL_id, s16 Limit);
 void Disp_Personal_Count(s16 PL_id, s8 counter);
 void Setup_Play_Type();
+void Clear_Training_Hitbox_Debug_Flags();
 void Clear_Flash_No();
 
 /// @brief Check if a player wants to skip an animation
