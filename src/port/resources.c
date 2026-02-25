@@ -21,18 +21,11 @@ static bool check_if_file_present(const char* filename) {
     return result;
 }
 
-static void create_resources_directory() {
-    char* path = Resources_GetPath(NULL);
-    SDL_CreateDirectory(path);
-    SDL_free(path);
-}
-
 static bool copy_file(const char* rom_path, const char* src_name, const char* dst_name) {
     char* src_path = NULL;
     char* dst_path = Resources_GetPath(dst_name);
     SDL_asprintf(&src_path, "%s/%s", rom_path, src_name);
 
-    create_resources_directory();
     const bool success = SDL_CopyFile(src_path, dst_path);
 
     SDL_free(src_path);
@@ -44,7 +37,7 @@ static bool copy_file(const char* rom_path, const char* src_name, const char* ds
 static void open_folder_dialog_callback(void* userdata, const char* const* filelist, int filter) {
     const char* rom_path = filelist[0];
     bool success = true;
-    success &= copy_file(rom_path, "THIRD/SF33RD.AFS", "SF33RD.AFS");
+    success &= copy_file(rom_path, "SF33RD.AFS", "SF33RD.AFS");
     flow_state = success ? COPY_SUCCESS : COPY_ERROR;
 }
 
