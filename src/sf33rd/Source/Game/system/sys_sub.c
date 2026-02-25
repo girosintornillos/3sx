@@ -986,10 +986,23 @@ void njWaitVSync_with_N() {
     while (1) {}
 }
 
+void Clear_Training_Hitbox_Debug_Flags() {
+    s16 ix;
+
+    for (ix = DEBUG_CURRENT_BOX_DATA; ix <= DEBUG_DISP_EFFECT_TYPE; ix++) {
+        Debug_w[ix] = 0;
+    }
+}
+
 void Soft_Reset_Sub() {
     FadeOut(1, 0xFF, 8);
     sound_all_off();
     SsBgmHalfVolume(0);
+
+    if (Mode_Type == MODE_NORMAL_TRAINING || Mode_Type == MODE_PARRY_TRAINING) {
+        Clear_Training_Hitbox_Debug_Flags();
+        Disp_Attack_Data = 0;
+    }
 
     if (task[TASK_GAME].condition == 0) {
         cpReadyTask(TASK_GAME, Game_Task);
